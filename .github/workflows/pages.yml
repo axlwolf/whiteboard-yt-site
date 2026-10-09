@@ -1,0 +1,48 @@
+name: Publicar en GitHub Pages
+
+# Publica index.html y privacy.html cada vez que hay un push a main (o a mano desde Actions).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Solo lo mínimo: leer el repo y publicar en Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Un despliegue a la vez; si llega otro push, se cancela el anterior.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Revisar que no queden marcadores sin llenar
+        run: |
+          if grep -nE 'CHANNEL_NAME|>CONTACT<' index.html privacy.html; then
+            echo "::error::Llena CHANNEL_NAME y CONTACT antes de publicar"
+            exit 1
+          fi
+
+      - name: Preparar solo los archivos del sitio
+        run: |
+          mkdir -p _site
+          cp index.html privacy.html _site/
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
