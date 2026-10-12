@@ -28,7 +28,7 @@ jobs:
 
       - name: Revisar que no queden marcadores sin llenar
         run: |
-          if grep -nE 'CHANNEL_NAME|>CONTACT<' index.html privacy.html; then
+          if grep -nE 'CHANNEL_NAME|>CONTACT<' index.html privacy.html terms.html; then
             echo "::error::Llena CHANNEL_NAME y CONTACT antes de publicar"
             exit 1
           fi
@@ -36,7 +36,7 @@ jobs:
       - name: Preparar solo los archivos del sitio
         run: |
           mkdir -p _site
-          cp index.html privacy.html _site/
+          cp index.html privacy.html terms.html _site/
 
       - uses: actions/configure-pages@v5
 
